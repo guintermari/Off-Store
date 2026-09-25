@@ -1,0 +1,21 @@
+services:
+
+  backend:
+    build: ./backend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - secondary-api
+
+  secondary-api:
+    build: ./secondary-api
+    ports:
+      - "3001:3001"
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5174:5174"
+    depends_on:
+      - backend
+      - secondary-api

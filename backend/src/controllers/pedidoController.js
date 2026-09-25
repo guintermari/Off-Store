@@ -17,19 +17,21 @@ async function criarPedido(req, res) {
         }
         
         for (const item of itens) {
-        const resposta = await fetch(`http://localhost:3001/produtos/${item.produto_id}`);
+        const resposta = await fetch(
+            `https://fakestoreapi.com/products/${item.produto_id}`
+        );
 
         if (!resposta.ok) {
             return res.status(404).json({
-                erro: `Produto ${item.produto_id} não encontrado na API de produtos.`
+                erro: `Product ${item.produto_id} not found.`
             });
         }
 
         const produto = await resposta.json();
 
-        item.nome_produto = produto.nome;
-        item.preco = produto.preco;
-        }
+        item.nome_produto = produto.title;
+        item.preco = produto.price;
+}
 
         // Verifica se o cliente já existe
         let clienteExistente = db
