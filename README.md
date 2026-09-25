@@ -38,6 +38,22 @@ Os produtos são obtidos através da **Fake Store API**, enquanto o backend é r
 -  Integração com API externa
 -  Docker e Docker Compose
 
+##  API Externa
+
+O projeto utiliza a Fake Store API como fonte externa de dados dos produtos.
+
+A API é pública e pode ser utilizada sem cadastro ou chave de API.
+
+### Rota utilizada
+
+GET https://fakestoreapi.com/products
+
+Essa rota é consumida diretamente pelo frontend, e os dados recebidos são tratados e apresentados dentro da aplicação.
+
+##  Fluxograma 
+
+![Fluxograma da arquitetura](./docs/arquitetura-off-store.svg)
+
 ##  Projeto acadêmico
 
 Projeto desenvolvido para aplicação prática de conceitos de **arquitetura de software** aprendido na sprint.
