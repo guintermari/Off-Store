@@ -18,7 +18,7 @@ async function criarPedido(req, res) {
         
         for (const item of itens) {
         const resposta = await fetch(
-            `https://fakestoreapi.com/products/${item.produto_id}`
+            `http://secondary-api:3001/produtos/${item.produto_id}`
         );
 
         if (!resposta.ok) {
