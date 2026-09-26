@@ -10,6 +10,10 @@ function App() {
   const [pedidos, setPedidos] = useState([]);
   const [historicoAberto, setHistoricoAberto] = useState(false);
 
+  // =========================
+  // GET PRODUCTS
+  // =========================
+
   useEffect(() => {
     fetch('https://fakestoreapi.com/products')
       .then((resposta) => resposta.json())
@@ -21,6 +25,10 @@ function App() {
       });
   }, []);
 
+  // =========================
+  // ADD TO CART
+  // =========================
+
   function adicionarAoCarrinho(produto) {
     const produtoExistente = carrinho.find(
       (item) => item.id === produto.id
@@ -30,7 +38,10 @@ function App() {
       setCarrinho(
         carrinho.map((item) =>
           item.id === produto.id
-            ? { ...item, quantidade: item.quantidade + 1 }
+            ? {
+                ...item,
+                quantidade: item.quantidade + 1
+              }
             : item
         )
       );
@@ -45,27 +56,45 @@ function App() {
     }
   }
 
+  // =========================
+  // INCREASE QUANTITY
+  // =========================
+
   function aumentarQuantidade(id) {
     setCarrinho(
       carrinho.map((item) =>
         item.id === id
-          ? { ...item, quantidade: item.quantidade + 1 }
+          ? {
+              ...item,
+              quantidade: item.quantidade + 1
+            }
           : item
       )
     );
   }
+
+  // =========================
+  // DECREASE QUANTITY
+  // =========================
 
   function diminuirQuantidade(id) {
     setCarrinho(
       carrinho
         .map((item) =>
           item.id === id
-            ? { ...item, quantidade: item.quantidade - 1 }
+            ? {
+                ...item,
+                quantidade: item.quantidade - 1
+              }
             : item
         )
         .filter((item) => item.quantidade > 0)
     );
   }
+
+  // =========================
+  // CHECKOUT
+  // =========================
 
   async function finalizarPedido() {
     if (!nome || !email) {
@@ -84,19 +113,22 @@ function App() {
     }));
 
     try {
-      const resposta = await fetch('http://localhost:3000/pedidos', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          cliente: {
-            nome: nome,
-            email: email
+      const resposta = await fetch(
+        'http://localhost:3000/pedidos',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
           },
-          itens: itens
-        })
-      });
+          body: JSON.stringify({
+            cliente: {
+              nome: nome,
+              email: email
+            },
+            itens: itens
+          })
+        }
+      );
 
       const dados = await resposta.json();
 
@@ -118,19 +150,35 @@ function App() {
     }
   }
 
+  // =========================
+  // CATEGORIES
+  // =========================
+
   const categorias = [
-    ...new Set(produtos.map((produto) => produto.category))
+    ...new Set(
+      produtos.map((produto) => produto.category)
+    )
   ];
 
+  // =========================
+  // CART TOTAL
+  // =========================
+
   const totalCarrinho = carrinho.reduce(
-    (total, produto) => total + produto.price * produto.quantidade,
+    (total, produto) =>
+      total + produto.price * produto.quantidade,
     0
   );
 
-  // GET
+  // =========================
+  // GET ORDERS
+  // =========================
+
   async function carregarPedidos() {
     try {
-      const resposta = await fetch('http://localhost:3000/pedidos');
+      const resposta = await fetch(
+        'http://localhost:3000/pedidos'
+      );
 
       const dados = await resposta.json();
 
@@ -138,99 +186,140 @@ function App() {
       setHistoricoAberto(true);
 
     } catch (erro) {
-      console.error('Erro ao buscar pedidos:', erro);
+      console.error(
+        'Erro ao buscar pedidos:',
+        erro
+      );
+
       alert('Could not load orders.');
     }
   }
 
-  // PUT
-  async function atualizarPedido(id, statusAtual) {
-  const novoStatus =
-    statusAtual === 'Pendente'
-      ? 'Enviado'
-      : 'Pendente';
+  // =========================
+  // PUT - UPDATE ORDER STATUS
+  // =========================
 
-  try {
-    const resposta = await fetch(
-      `http://localhost:3000/pedidos/${id}`,
-      {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          status: novoStatus
-        })
+  async function atualizarPedido(id, novoStatus) {
+    try {
+      const resposta = await fetch(
+        `http://localhost:3000/pedidos/${id}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            status: novoStatus
+          })
+        }
+      );
+
+      const dados = await resposta.json();
+
+      if (!resposta.ok) {
+        alert(
+          dados.erro ||
+          'Could not update the order.'
+        );
+
+        return;
       }
+
+      alert('Order updated successfully!');
+
+      carregarPedidos();
+
+    } catch (erro) {
+      console.error(
+        'Error updating order:',
+        erro
+      );
+
+      alert(
+        'Could not connect to the server.'
+      );
+    }
+  }
+
+  // =========================
+  // DELETE ORDER
+  // =========================
+
+  async function deletarPedido(id) {
+    const confirmar = window.confirm(
+      'Are you sure you want to delete this order?'
     );
 
-    const dados = await resposta.json();
-
-    if (!resposta.ok) {
-      alert(dados.erro || 'Could not update the order.');
+    if (!confirmar) {
       return;
     }
 
-    alert('Order updated successfully!');
+    try {
+      const resposta = await fetch(
+        `http://localhost:3000/pedidos/${id}`,
+        {
+          method: 'DELETE'
+        }
+      );
 
-    carregarPedidos();
+      const dados = await resposta.json();
 
-  } catch (erro) {
-    console.error('Error updating order:', erro);
-    alert('Could not connect to the server.');
-  }
-}
+      if (!resposta.ok) {
+        alert(
+          dados.erro ||
+          'Could not delete the order.'
+        );
 
-async function deletarPedido(id) {
-  const confirmar = window.confirm(
-    'Are you sure you want to delete this order?'
-  );
-
-  if (!confirmar) {
-    return;
-  }
-
-  try {
-    const resposta = await fetch(
-      `http://localhost:3000/pedidos/${id}`,
-      {
-        method: 'DELETE'
+        return;
       }
-    );
 
-    const dados = await resposta.json();
+      alert('Order deleted successfully!');
 
-    if (!resposta.ok) {
-      alert(dados.erro || 'Could not delete the order.');
-      return;
+      setPedidos(
+        pedidos.filter(
+          (pedido) => pedido.id !== id
+        )
+      );
+
+    } catch (erro) {
+      console.error(
+        'Error deleting order:',
+        erro
+      );
+
+      alert(
+        'Could not connect to the server.'
+      );
     }
-
-    alert('Order deleted successfully!');
-
-    setPedidos(
-      pedidos.filter((pedido) => pedido.id !== id)
-    );
-
-  } catch (erro) {
-    console.error('Error deleting order:', erro);
-    alert('Could not connect to the server.');
   }
-}
 
   return (
     <div>
+
+      {/* =========================
+          HEADER
+          ========================= */}
 
       <header>
         <h1>OFF STORE</h1>
         <p>Fashion & Lifestyle</p>
       </header>
 
+
+      {/* =========================
+          PRODUCTS
+          ========================= */}
+
       <main>
 
         <h2>Our Products</h2>
 
         {categorias.map((categoria) => (
-          <section className="categoria" key={categoria}>
+
+          <section
+            className="categoria"
+            key={categoria}
+          >
 
             <h2>{categoria}</h2>
 
@@ -238,7 +327,8 @@ async function deletarPedido(id) {
 
               {produtos
                 .filter(
-                  (produto) => produto.category === categoria
+                  (produto) =>
+                    produto.category === categoria
                 )
                 .map((produto) => (
 
@@ -260,6 +350,7 @@ async function deletarPedido(id) {
                     </p>
 
                     <button
+                      className="add-button"
                       onClick={() =>
                         adicionarAoCarrinho(produto)
                       }
@@ -274,15 +365,23 @@ async function deletarPedido(id) {
             </div>
 
           </section>
+
         ))}
 
       </main>
+
+
+      {/* =========================
+          SHOPPING CART
+          ========================= */}
 
       <aside className="carrinho">
 
         <h2>Shopping Cart</h2>
 
-        <p>{carrinho.length} item(s)</p>
+        <p>
+          {carrinho.length} item(s)
+        </p>
 
         {carrinho.map((produto) => (
 
@@ -291,15 +390,22 @@ async function deletarPedido(id) {
             key={produto.id}
           >
 
-            <strong>{produto.title}</strong>
+            <strong>
+              {produto.title}
+            </strong>
 
             <span>
-              ${(produto.price * produto.quantidade).toFixed(2)}
+              $
+              {(
+                produto.price *
+                produto.quantidade
+              ).toFixed(2)}
             </span>
 
             <div className="quantidade">
 
               <button
+                className="quantidade-button"
                 onClick={() =>
                   diminuirQuantidade(produto.id)
                 }
@@ -307,9 +413,12 @@ async function deletarPedido(id) {
                 −
               </button>
 
-              <span>{produto.quantidade}</span>
+              <span className="quantidade-numero">
+                {produto.quantidade}
+              </span>
 
               <button
+                className="quantidade-button"
                 onClick={() =>
                   aumentarQuantidade(produto.id)
                 }
@@ -323,9 +432,14 @@ async function deletarPedido(id) {
 
         ))}
 
+
+        {/* TOTAL */}
+
         <div className="total-carrinho">
 
-          <strong>Total:</strong>
+          <strong>
+            Total:
+          </strong>
 
           <span>
             ${totalCarrinho.toFixed(2)}
@@ -333,12 +447,20 @@ async function deletarPedido(id) {
 
         </div>
 
+
+        {/* CHECKOUT */}
+
         <button
           className="checkout-button"
-          onClick={() => setCheckoutAberto(true)}
+          onClick={() =>
+            setCheckoutAberto(true)
+          }
         >
           Checkout
         </button>
+
+
+        {/* HISTORY */}
 
         <button
           className="history-button"
@@ -348,6 +470,11 @@ async function deletarPedido(id) {
         </button>
 
       </aside>
+
+
+      {/* =========================
+          CHECKOUT
+          ========================= */}
 
       {checkoutAberto && (
 
@@ -381,7 +508,9 @@ async function deletarPedido(id) {
             }
           />
 
-          <button onClick={finalizarPedido}>
+          <button
+            onClick={finalizarPedido}
+          >
             Place Order
           </button>
 
@@ -398,11 +527,18 @@ async function deletarPedido(id) {
 
       )}
 
+
+      {/* =========================
+          ORDER HISTORY
+          ========================= */}
+
       {historicoAberto && (
 
         <div className="historico">
 
-          <h2>Order History</h2>
+          <h2>
+            Order History
+          </h2>
 
           {pedidos.map((pedido) => (
 
@@ -417,11 +553,14 @@ async function deletarPedido(id) {
                   Order #{pedido.id}
                 </strong>
 
-                <span>
+                <span
+                  className={`status-badge status-${pedido.status.toLowerCase()}`}
+                >
                   {pedido.status}
                 </span>
 
               </div>
+
 
               <p>
                 Customer: {pedido.cliente}
@@ -432,32 +571,62 @@ async function deletarPedido(id) {
               </p>
 
               <p>
-                Total: ${pedido.valor_total.toFixed(2)}
+                Total: $
+                {pedido.valor_total.toFixed(2)}
               </p>
 
               <p>
                 Date: {pedido.data}
               </p>
 
+
+              {/* ACTIONS */}
+
               <div className="pedido-acoes">
 
-                <button
-                  onClick={() =>
+                <select
+                  className="status-select"
+                  value={pedido.status}
+                  onChange={(e) =>
                     atualizarPedido(
                       pedido.id,
-                      pedido.status
+                      e.target.value
                     )
                   }
                 >
-                  Update Status
-                </button>
+
+                  <option value="Pendente">
+                    Pending
+                  </option>
+
+                  <option value="Processando">
+                    Processing
+                  </option>
+
+                  <option value="Enviado">
+                    Shipped
+                  </option>
+
+                  <option value="Entregue">
+                    Delivered
+                  </option>
+
+                  <option value="Cancelado">
+                    Cancelled
+                  </option>
+
+                </select>
+
 
                 <button
+                  className="delete-button"
                   onClick={() =>
-                    deletarPedido(pedido.id)
+                    deletarPedido(
+                      pedido.id
+                    )
                   }
                 >
-                  Delete Order
+                  Delete
                 </button>
 
               </div>
@@ -466,7 +635,9 @@ async function deletarPedido(id) {
 
           ))}
 
+
           <button
+            className="close-history-button"
             onClick={() =>
               setHistoricoAberto(false)
             }
