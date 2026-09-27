@@ -52,7 +52,7 @@ Essa rota é consumida diretamente pelo frontend, e os dados recebidos são trat
 
 ##  Fluxograma 
 
-![Fluxograma da arquitetura](./docs/arquitetura-off-store.svg)
+[![Fluxograma da arquitetura](./docs/arquitetura-off-store.svg)](https://github.com/guintermari/Off-Store/blob/main/Docs/arquitetura.png)
 
 ##  Projeto acadêmico
 
