@@ -44,6 +44,8 @@ O projeto utiliza a Fake Store API como fonte externa de dados dos produtos.
 
 A API é pública e pode ser utilizada sem cadastro ou chave de API.
 
+Link API: https://fakestoreapi.com/
+
 ### Rota utilizada
 
 GET https://fakestoreapi.com/products
